@@ -1,3 +1,4 @@
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,10 @@ public class Inventory {
         productMap = new HashMap<>();
         // 初始化测试商品（实际项目可从数据库加载）
         initTestProducts();
+    }
+    // 获取所有商品（供库存查询面板使用）
+    public Collection<Product> getAllProducts() {
+        return productMap.values();
     }
 
     // 单例获取方法

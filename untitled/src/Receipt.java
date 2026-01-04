@@ -35,6 +35,20 @@ public class Receipt {
                 .mapToDouble(ShoppingItem::calculateItemTotal)
                 .sum();
     }
+    // 获取购物项列表（供收据预览面板使用）
+    public List<ShoppingItem> getItems() {
+        return items;
+    }
+
+    // 获取交易类型（供收据预览面板使用）
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    // 获取交易时间（供收据预览面板使用）
+    public Date getTransactionTime() {
+        return transactionTime;
+    }
 
     // 打印收据（控制台输出，实际项目可导出为PDF）
     public void printReceipt() {

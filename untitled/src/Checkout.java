@@ -92,6 +92,10 @@ public class Checkout {
                 .mapToDouble(ShoppingItem::calculateItemTotal)
                 .sum();
     }
+    // 获取当前交易的购物项（供GUI显示商品明细）
+    public List<ShoppingItem> getCurrentItems() {
+        return currentItems;
+    }
 
     // 取消当前交易
     public void cancelTransaction() {
