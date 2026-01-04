@@ -35,12 +35,12 @@ public class SalePanel extends JPanel {
         JPanel inputPanel = new JPanel(new GridLayout(1, 4, 10, 10));
         inputPanel.add(new JLabel("商品ID：", SwingConstants.CENTER));
         productIdField = new JTextField();
-        productIdField.setHintText("输入商品ID（如P001）");
+        productIdField.setText("输入商品ID（如P001）");
         inputPanel.add(productIdField);
 
         inputPanel.add(new JLabel("购买数量：", SwingConstants.CENTER));
         quantityField = new JTextField();
-        quantityField.setHintText("输入正整数");
+        quantityField.setText("输入正整数");
         inputPanel.add(quantityField);
 
         JButton addBtn = new JButton("添加商品");
@@ -66,7 +66,7 @@ public class SalePanel extends JPanel {
 
         payPanel.add(new JLabel("支付金额：", SwingConstants.CENTER));
         cashField = new JTextField();
-        cashField.setHintText("输入支付现金金额");
+        cashField.setText("输入支付现金金额");
         payPanel.add(cashField);
 
         JButton payBtn = new JButton("确认支付");
