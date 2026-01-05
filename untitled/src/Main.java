@@ -1,64 +1,64 @@
 import java.util.Scanner;
 
 /**
- * 交互式POS主程序：支持持续运行、用户手动输入操作，适配实际使用场景
+ * Interactive POS main program: supports continuous running and manual user input, suitable for real-world usage scenarios
  */
 public class Main {
-    // 全局Scanner（避免重复创建）
+    // Global Scanner (avoid repeated creation)
     private static final Scanner scanner = new Scanner(System.in);
-    // 收银台实例（核心业务对象）
+    // Checkout instance (core business object)
     private static final Checkout checkout = new Checkout();
 
     public static void main(String[] args) {
         System.out.println("======================================");
-        System.out.println("        超市POS系统 - 交互式版本");
+        System.out.println("        Supermarket POS System - CLI");
         System.out.println("======================================");
-        System.out.println("支持功能：1. 处理销售  2. 处理退货  3. 退出系统");
+        System.out.println("Features: 1. Sale  2. Return  3. Exit");
         System.out.println("======================================");
 
-        // 持续运行：循环显示菜单，直到用户选择退出
+        // Continuous running: show menu until user chooses to exit
         while (true) {
             try {
-                // 1. 显示主菜单，获取用户选择
-                System.out.print("\n请输入功能编号（1-3）：");
+                // 1. Show main menu and get user selection
+                System.out.print("\nPlease enter the function number (1-3): ");
                 int choice = Integer.parseInt(scanner.nextLine().trim());
 
-                // 2. 根据选择执行对应功能
+                // 2. Execute corresponding function according to selection
                 switch (choice) {
                     case 1:
-                        handleSale(); // 处理销售
+                        handleSale(); // Process sale
                         break;
                     case 2:
-                        handleReturn(); // 处理退货
+                        handleReturn(); // Process return
                         break;
                     case 3:
-                        exitSystem(); // 退出系统
-                        return; // 终止程序
+                        exitSystem(); // Exit system
+                        return; // Terminate program
                     default:
-                        System.out.println("❌ 输入错误！请输入1-3之间的数字");
+                        System.out.println("❌ Invalid input! Please enter a number between 1 and 3");
                 }
 
-                // 3. 操作完成后，询问是否继续
+                // 3. After operation, ask whether to continue
                 if (!isContinue()) {
                     exitSystem();
                     return;
                 }
 
             } catch (NumberFormatException e) {
-                // 捕获非数字输入异常
-                System.out.println("❌ 输入格式错误！请输入有效数字");
+                // Capture non-numeric input exception
+                System.out.println("❌ Invalid format! Please enter a valid number");
             } catch (IllegalArgumentException e) {
-                // 捕获业务异常（如商品不存在、库存不足等）
-                System.out.println("❌ 操作失败：" + e.getMessage());
-                checkout.cancelTransaction(); // 取消当前交易
-                // 询问是否继续
+                // Capture business exceptions (e.g. product not found, insufficient stock, etc.)
+                System.out.println("❌ Operation failed: " + e.getMessage());
+                checkout.cancelTransaction(); // Cancel current transaction
+                // Ask whether to continue
                 if (!isContinue()) {
                     exitSystem();
                     return;
                 }
             } catch (Exception e) {
-                // 捕获其他未知异常
-                System.out.println("❌ 系统异常：" + e.getMessage());
+                // Capture other unknown exceptions
+                System.out.println("❌ System error: " + e.getMessage());
                 checkout.cancelTransaction();
                 if (!isContinue()) {
                     exitSystem();
@@ -69,153 +69,153 @@ public class Main {
     }
 
     /**
-     * 处理销售流程：用户输入商品ID、数量，支持多商品添加
+     * Sale flow: user enters product ID and quantity, supports adding multiple products
      */
     private static void handleSale() {
-        System.out.println("\n===== 进入【销售模式】=====");
-        System.out.println("提示：输入商品ID和购买数量，输入'0'结束添加商品");
+        System.out.println("\n===== Entering [SALE MODE] =====");
+        System.out.println("Tip: Enter product ID and purchase quantity, input '0' to finish adding products");
 
         while (true) {
             try {
-                // 输入商品ID
-                System.out.print("请输入商品ID（输入'0'结束添加）：");
+                // Enter product ID
+                System.out.print("Please enter product ID (enter '0' to finish): ");
                 String productId = scanner.nextLine().trim();
 
-                // 结束添加商品
+                // Finish adding products
                 if ("0".equals(productId)) {
                     if (checkout.calculateTotalAmount() <= 0) {
-                        System.out.println("⚠️  未添加任何商品，返回主菜单");
+                        System.out.println("⚠️  No products added, returning to main menu");
                         return;
                     }
                     break;
                 }
 
-                // 输入购买数量（必须为正数）
-                System.out.print("请输入购买数量（正数）：");
+                // Enter purchase quantity (must be positive)
+                System.out.print("Please enter purchase quantity (positive integer): ");
                 int quantity = Integer.parseInt(scanner.nextLine().trim());
                 if (quantity <= 0) {
-                    System.out.println("❌ 购买数量必须大于0，请重新输入");
+                    System.out.println("❌ Purchase quantity must be greater than 0, please re-enter");
                     continue;
                 }
 
-                // 添加商品到交易
+                // Add product to transaction
                 checkout.addItem(productId, quantity);
-                System.out.println("✅ 商品添加成功！当前累计金额：" + checkout.calculateTotalAmount() + " 元");
+                System.out.println("✅ Product added successfully! Current total amount: " + checkout.calculateTotalAmount() + " CNY");
 
             } catch (NumberFormatException e) {
-                System.out.println("❌ 数量输入错误！请输入有效数字");
+                System.out.println("❌ Quantity input error! Please enter a valid number");
             } catch (IllegalArgumentException e) {
-                System.out.println("❌ 商品添加失败：" + e.getMessage());
+                System.out.println("❌ Failed to add product: " + e.getMessage());
             }
         }
 
-        // 计算总金额
+        // Calculate total amount
         double totalAmount = checkout.calculateTotalAmount();
-        System.out.println("\n📊 本次交易总金额：" + totalAmount + " 元");
+        System.out.println("\n📊 Total amount this transaction: " + totalAmount + " CNY");
 
-        // 输入支付金额
+        // Enter payment amount
         double cashAmount;
         while (true) {
             try {
-                System.out.print("请输入支付金额（现金）：");
+                System.out.print("Please enter payment amount (cash): ");
                 cashAmount = Double.parseDouble(scanner.nextLine().trim());
                 if (cashAmount >= totalAmount) {
                     break;
                 } else {
-                    System.out.println("❌ 支付金额不足！应付：" + totalAmount + " 元，请重新输入");
+                    System.out.println("❌ Insufficient payment! Amount due: " + totalAmount + " CNY, please re-enter");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("❌ 金额输入错误！请输入有效数字");
+                System.out.println("❌ Amount input error! Please enter a valid number");
             }
         }
 
-        // 处理支付并生成收据
-        System.out.println("\n💳 支付成功！正在打印收据...");
+        // Handle payment and generate receipt
+        System.out.println("\n💳 Payment successful! Printing receipt...");
         Receipt saleReceipt = checkout.processPayment(cashAmount);
         saleReceipt.printReceipt();
-        System.out.println("===== 销售流程结束 =====");
+        System.out.println("===== Sale completed =====");
     }
 
     /**
-     * 处理退货流程：用户输入商品ID、退货数量，支持多商品退货
+     * Return flow: user enters product ID and return quantity, supports multiple product returns
      */
     private static void handleReturn() {
-        System.out.println("\n===== 进入【退货模式】=====");
-        System.out.println("提示：输入退货商品ID和数量，输入'0'结束添加退货商品");
+        System.out.println("\n===== Entering [RETURN MODE] =====");
+        System.out.println("Tip: Enter return product ID and quantity, input '0' to finish adding return items");
 
         while (true) {
             try {
-                // 输入商品ID
-                System.out.print("请输入退货商品ID（输入'0'结束添加）：");
+                // Enter product ID
+                System.out.print("Please enter return product ID (enter '0' to finish): ");
                 String productId = scanner.nextLine().trim();
 
-                // 结束添加退货商品
+                // Finish adding return items
                 if ("0".equals(productId)) {
                     double totalRefund = checkout.calculateTotalAmount();
                     if (totalRefund >= 0) {
-                        System.out.println("⚠️  未添加任何退货商品，返回主菜单");
+                        System.out.println("⚠️  No return items added, returning to main menu");
                         checkout.cancelTransaction();
                         return;
                     }
                     break;
                 }
 
-                // 输入退货数量（必须为正数，程序内部转为负数）
-                System.out.print("请输入退货数量（正数）：");
+                // Enter return quantity (must be positive, converted to negative internally)
+                System.out.print("Please enter return quantity (positive integer): ");
                 int quantity = Integer.parseInt(scanner.nextLine().trim());
                 if (quantity <= 0) {
-                    System.out.println("❌ 退货数量必须大于0，请重新输入");
+                    System.out.println("❌ Return quantity must be greater than 0, please re-enter");
                     continue;
                 }
 
-                // 添加退货商品（数量传负数表示退货）
+                // Add return item (negative quantity means return)
                 checkout.addItem(productId, -quantity);
                 double currentRefund = Math.abs(checkout.calculateTotalAmount());
-                System.out.println("✅ 退货商品添加成功！当前应退金额：" + currentRefund + " 元");
+                System.out.println("✅ Return item added successfully! Current refund amount: " + currentRefund + " CNY");
 
             } catch (NumberFormatException e) {
-                System.out.println("❌ 数量输入错误！请输入有效数字");
+                System.out.println("❌ Quantity input error! Please enter a valid number");
             } catch (IllegalArgumentException e) {
-                System.out.println("❌ 退货商品添加失败：" + e.getMessage());
+                System.out.println("❌ Failed to add return item: " + e.getMessage());
             }
         }
 
-        // 计算退款金额
+        // Calculate refund amount
         double totalRefund = Math.abs(checkout.calculateTotalAmount());
-        System.out.println("\n📊 本次应退金额：" + totalRefund + " 元");
+        System.out.println("\n📊 Refund amount this time: " + totalRefund + " CNY");
 
-        // 确认退货
-        System.out.print("是否确认退货？（Y/N）：");
+        // Confirm return
+        System.out.print("Confirm return? (Y/N): ");
         String confirm = scanner.nextLine().trim().toUpperCase();
         if ("Y".equals(confirm)) {
-            // 处理退货并生成收据
-            System.out.println("\n🔄 退货处理中...正在打印退货收据...");
+            // Handle return and generate receipt
+            System.out.println("\n🔄 Processing return... Printing receipt...");
             Receipt returnReceipt = checkout.processReturn();
             returnReceipt.printReceipt();
-            System.out.println("===== 退货流程结束 =====");
+            System.out.println("===== Return completed =====");
         } else {
-            System.out.println("❌ 已取消退货");
+            System.out.println("❌ Return cancelled");
             checkout.cancelTransaction();
         }
     }
 
     /**
-     * 询问用户是否继续操作
+     * Ask user whether to continue
      */
     private static boolean isContinue() {
-        System.out.print("\n是否继续使用POS系统？（Y/N）：");
+        System.out.print("\nContinue using the POS system? (Y/N): ");
         String choice = scanner.nextLine().trim().toUpperCase();
         return "Y".equals(choice);
     }
 
     /**
-     * 退出系统
+     * Exit system
      */
     private static void exitSystem() {
         System.out.println("\n======================================");
-        System.out.println("        感谢使用超市POS系统！");
-        System.out.println("           祝您工作顺利！");
+        System.out.println("        Thank you for using the POS System!");
+        System.out.println("            Have a nice day!");
         System.out.println("======================================");
-        scanner.close(); // 关闭Scanner
+        scanner.close(); // Close Scanner
     }
 }

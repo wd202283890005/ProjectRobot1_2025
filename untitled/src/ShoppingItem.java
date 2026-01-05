@@ -1,16 +1,16 @@
 /**
- * 购物项类：关联商品与购买/退货数量
+ * ShoppingItem class: associates a product with a purchase/return quantity
  */
 public class ShoppingItem {
-    private Product product;  // 关联的商品
-    private int quantity;     // 数量（正数=购买，负数=退货）
+    private Product product;  // Associated product
+    private int quantity;     // Quantity (positive = purchase, negative = return)
 
     public ShoppingItem(Product product, int quantity) {
         this.product = product;
         this.quantity = quantity;
     }
 
-    // Getter 方法
+    // Getter methods
     public Product getProduct() {
         return product;
     }
@@ -19,7 +19,7 @@ public class ShoppingItem {
         return quantity;
     }
 
-    // 计算当前购物项的金额（单价×数量）
+    // Calculate subtotal for this item (unit price × quantity)
     public double calculateItemTotal() {
         return product.getPrice() * quantity;
     }

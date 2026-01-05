@@ -5,119 +5,117 @@ import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
 /**
- * 销售功能面板：输入商品ID、数量，添加商品，支付，显示累计金额
+ * Sale panel: input product ID & quantity, add items, pay, show total amount
  */
 public class SalePanel extends JPanel {
     private final Checkout checkout;
-    private final Consumer<Receipt> receiptCallback; // 收据回调（用于显示预览）
+    private final Consumer<Receipt> receiptCallback; // Receipt callback (for preview)
 
-    // 组件
-    private JTextField productIdField; // 商品ID输入框
-    private JTextField quantityField; // 数量输入框
-    private JTextArea cartTextArea; // 购物车显示区
-    private JLabel totalAmountLabel; // 累计金额标签
-    private JTextField cashField; // 支付金额输入框
+    // Components
+    private JTextField productIdField; // Product ID input
+    private JTextField quantityField;  // Quantity input
+    private JTextArea cartTextArea;    // Cart display area
+    private JLabel totalAmountLabel;   // Total amount label
+    private JTextField cashField;      // Cash input
 
     public SalePanel(Checkout checkout, Consumer<Receipt> receiptCallback) {
         this.checkout = checkout;
         this.receiptCallback = receiptCallback;
-        initUI(); // 初始化界面
+        initUI(); // Initialize UI
     }
 
     /**
-     * 初始化销售面板UI
+     * Initialize UI components
      */
     private void initUI() {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // 1. 顶部：输入区域（商品ID + 数量 + 添加按钮）
+        // 1. Top: input area (product ID + quantity + add button)
         JPanel inputPanel = new JPanel(new GridLayout(1, 4, 10, 10));
-        inputPanel.add(new JLabel("商品ID：", SwingConstants.CENTER));
+        inputPanel.add(new JLabel("Product ID:", SwingConstants.CENTER));
         productIdField = new JTextField();
-        //productIdField.setText("输入商品ID（如P001）");
         inputPanel.add(productIdField);
 
-        inputPanel.add(new JLabel("购买数量：", SwingConstants.CENTER));
+        inputPanel.add(new JLabel("Quantity:", SwingConstants.CENTER));
         quantityField = new JTextField();
-        quantityField.setText("输入正整数");
+        quantityField.setText("Enter positive integer");
         inputPanel.add(quantityField);
 
-        JButton addBtn = new JButton("添加商品");
+        JButton addBtn = new JButton("Add Item");
         addBtn.addActionListener(new AddItemListener());
         inputPanel.add(addBtn);
         add(inputPanel, BorderLayout.NORTH);
 
-        // 2. 中间：购物车显示区
+        // 2. Middle: cart display
         cartTextArea = new JTextArea();
         cartTextArea.setEditable(false);
         cartTextArea.setFont(new Font("Monaco", Font.PLAIN, 12));
         JScrollPane cartScroll = new JScrollPane(cartTextArea);
-        cartScroll.setBorder(BorderFactory.createTitledBorder("当前购物车"));
+        cartScroll.setBorder(BorderFactory.createTitledBorder("Current Cart"));
         add(cartScroll, BorderLayout.CENTER);
 
-        // 3. 底部：金额与支付区域
+        // 3. Bottom: amount & payment area
         JPanel payPanel = new JPanel(new GridLayout(2, 3, 10, 10));
-        payPanel.add(new JLabel("累计金额：", SwingConstants.CENTER));
-        totalAmountLabel = new JLabel("0.00 元", SwingConstants.CENTER);
+        payPanel.add(new JLabel("Total:", SwingConstants.CENTER));
+        totalAmountLabel = new JLabel("0.00 CNY", SwingConstants.CENTER);
         totalAmountLabel.setFont(new Font("Arial", Font.BOLD, 14));
         totalAmountLabel.setForeground(Color.RED);
         payPanel.add(totalAmountLabel);
 
-        payPanel.add(new JLabel("支付金额：", SwingConstants.CENTER));
+        payPanel.add(new JLabel("Payment:", SwingConstants.CENTER));
         cashField = new JTextField();
-        //cashField.setText("输入支付现金金额");
         payPanel.add(cashField);
 
-        JButton payBtn = new JButton("确认支付");
+        JButton payBtn = new JButton("Pay");
         payBtn.addActionListener(new PayListener());
         payPanel.add(payBtn);
 
-        JButton resetBtn = new JButton("重置交易");
+        JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> resetTransaction());
         payPanel.add(resetBtn);
         add(payPanel, BorderLayout.SOUTH);
     }
 
     /**
-     * 添加商品按钮监听器
+     * Listener for "Add Item" button
      */
     private class AddItemListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                // 获取输入
+                // Retrieve input
                 String productId = productIdField.getText().trim();
                 int quantity = Integer.parseInt(quantityField.getText().trim());
 
-                // 输入校验
+                // Validate input
                 if (productId.isEmpty()) {
-                    JOptionPane.showMessageDialog(SalePanel.this, "商品ID不能为空！", "输入错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(SalePanel.this, "Product ID cannot be empty!", "Input Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 if (quantity <= 0) {
-                    JOptionPane.showMessageDialog(SalePanel.this, "购买数量必须为正整数！", "输入错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(SalePanel.this, "Quantity must be a positive integer!", "Input Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // 调用业务逻辑添加商品
+                // Business logic: add item
                 checkout.addItem(productId, quantity);
-                updateCartDisplay(); // 更新购物车显示
-                JOptionPane.showMessageDialog(SalePanel.this, "商品添加成功！", "成功", JOptionPane.INFORMATION_MESSAGE);
+                updateCartDisplay(); // Refresh cart display
+                JOptionPane.showMessageDialog(SalePanel.this, "Item added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-                // 清空输入框
+                // Clear input fields
                 productIdField.setText("");
                 quantityField.setText("");
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(SalePanel.this, "数量格式错误！请输入整数", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(SalePanel.this, "Quantity format error! Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
             } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(SalePanel.this, ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(SalePanel.this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     /**
-     * 支付按钮监听器
+     * Listener for "Pay" button
      */
     private class PayListener implements ActionListener {
         @Override
@@ -125,62 +123,61 @@ public class SalePanel extends JPanel {
             try {
                 double total = checkout.calculateTotalAmount();
                 if (total <= 0) {
-                    JOptionPane.showMessageDialog(SalePanel.this, "购物车为空，无法支付！", "错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(SalePanel.this, "Cart is empty, cannot pay!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // 获取支付金额
+                // Retrieve payment amount
                 double cash = Double.parseDouble(cashField.getText().trim());
                 if (cash < total) {
-                    JOptionPane.showMessageDialog(SalePanel.this, "支付金额不足！应付：" + total + " 元", "错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(SalePanel.this, "Insufficient payment! Due: " + total + " CNY", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // 调用业务逻辑处理支付
+                // Business logic: process payment
                 Receipt receipt = checkout.processPayment(cash);
-                JOptionPane.showMessageDialog(SalePanel.this, "支付成功！即将显示收据", "成功", JOptionPane.INFORMATION_MESSAGE);
-                receiptCallback.accept(receipt); // 回调显示收据预览
-                resetTransaction(); // 重置交易
+                JOptionPane.showMessageDialog(SalePanel.this, "Payment successful! Showing receipt.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                receiptCallback.accept(receipt); // Show receipt preview via callback
+                resetTransaction(); // Reset transaction
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(SalePanel.this, "支付金额格式错误！请输入数字", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(SalePanel.this, "Payment amount format error! Please enter a number", "Error", JOptionPane.ERROR_MESSAGE);
             } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(SalePanel.this, ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(SalePanel.this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     /**
-     * 更新购物车显示和累计金额
+     * Update cart display area and total amount
      */
     private void updateCartDisplay() {
         double total = checkout.calculateTotalAmount();
-        totalAmountLabel.setText(total + " 元");
+        totalAmountLabel.setText(total + " CNY");
 
-        // 构建购物车文本
+        // Build cart text
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-10s %-10s %-6s %-6s %-6s%n", "商品ID", "商品名称", "单价", "数量", "小计"));
+        sb.append(String.format("%-10s %-10s %-6s %-6s %-8s%n", "Product ID", "Name", "Price", "Qty", "Subtotal"));
         sb.append("----------------------------------------\n");
 
-        // （注：若需获取购物项列表，可给Checkout添加getCurrentItems()方法，此处省略，直接显示累计效果）
-        // 实际项目中可扩展Checkout，暴露当前购物项供GUI展示
-        sb.append(String.format("%-10s %-10s %-6s %-6s %-6.2f%n", "---", "累计", "---", "---", total));
+        // For simplicity, we only show the total here
+        sb.append(String.format("%-10s %-10s %-6s %-6s %-8.2f%n", "---", "Total", "---", "---", total));
         cartTextArea.setText(sb.toString());
     }
 
     /**
-     * 重置当前交易
+     * Reset current transaction
      */
     private void resetTransaction() {
         checkout.cancelTransaction();
         cartTextArea.setText("");
-        totalAmountLabel.setText("0.00 元");
+        totalAmountLabel.setText("0.00 CNY");
         productIdField.setText("");
         quantityField.setText("");
         cashField.setText("");
     }
 
     /**
-     * 为JTextField添加占位提示文本（工具方法）
+     * Utility: add placeholder text to JTextField
      */
     public static void setHintText(JTextField textField, String hint) {
         textField.putClientProperty("hint", hint);

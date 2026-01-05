@@ -2,104 +2,105 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 收银台类：核心业务逻辑（销售/退货处理）
+ * Checkout class: core business logic (handles sales/returns)
  */
 public class Checkout {
-    private Inventory inventory;  // 依赖库存管理类
-    private List<ShoppingItem> currentItems;  // 当前交易的购物项
+    private Inventory inventory;  // Depends on inventory management class
+    private List<ShoppingItem> currentItems;  // Shopping items in current transaction
 
     public Checkout() {
-        this.inventory = Inventory.getInstance();  // 依赖注入（单例）
+        this.inventory = Inventory.getInstance();  // Dependency injection (singleton)
         this.currentItems = new ArrayList<>();
     }
 
-    // 添加商品到当前交易（销售：数量为正；退货：数量为负）
+    // Add product to current transaction (sale: quantity positive; return: quantity negative)
     public void addItem(String productId, int quantity) {
-        // 1. 验证商品是否存在
+        // 1. Validate product exists
         Product product = inventory.getProductById(productId);
         if (product == null) {
-            throw new IllegalArgumentException("商品ID不存在：" + productId);
+            throw new IllegalArgumentException("Product ID not found: " + productId);
         }
 
-        // 2. 验证库存（销售：库存≥购买数量；退货：退货数量≥0）
-        if (quantity > 0) {  // 销售场景
+        // 2. Validate stock (sale: stock ≥ purchase qty; return: qty ≥ 0)
+        if (quantity > 0) {  // Sale scenario
             if (product.getStockQuantity() < quantity) {
-                throw new IllegalArgumentException("商品《" + product.getProductName() + "》库存不足，当前库存：" + product.getStockQuantity());
+                throw new IllegalArgumentException("Product \u300c" + product.getProductName() + "\u300d out of stock, current stock: " + product.getStockQuantity());
             }
-        } else if (quantity < 0) {  // 退货场景（数量为负，取绝对值）
+        } else if (quantity < 0) {  // Return scenario (quantity negative, take absolute value)
             if (Math.abs(quantity) <= 0) {
-                throw new IllegalArgumentException("退货数量必须大于0");
+                throw new IllegalArgumentException("Return quantity must be greater than 0");
             }
         }
 
-        // 3. 添加到购物项（若已存在该商品，更新数量）
-        boolean isExists = false;
-        for (ShoppingItem item : currentItems) {
+        // 3. Add to shopping list (update quantity if product already exists)
+        boolean exists = false;
+        for (int i = 0; i < currentItems.size(); i++) {
+            ShoppingItem item = currentItems.get(i);
             if (item.getProduct().getProductId().equals(productId)) {
-                item = new ShoppingItem(product, item.getQuantity() + quantity);
-                isExists = true;
+                currentItems.set(i, new ShoppingItem(product, item.getQuantity() + quantity));
+                exists = true;
                 break;
             }
         }
-        if (!isExists) {
+        if (!exists) {
             currentItems.add(new ShoppingItem(product, quantity));
         }
     }
 
-    // 处理支付（仅支持现金，验证支付金额≥总金额）
+    // Process payment (cash only, validate cashAmount ≥ total)
     public Receipt processPayment(double cashAmount) {
         double total = calculateTotalAmount();
         if (cashAmount < total) {
-            throw new IllegalArgumentException("支付金额不足！应付：" + total + " 元，实付：" + cashAmount + " 元");
+            throw new IllegalArgumentException("Insufficient payment! Due: " + total + " CNY, paid: " + cashAmount + " CNY");
         }
 
-        // 1. 更新库存（销售：减少库存；退货：增加库存）
+        // 1. Update stock (sale: decrease; return: increase)
         for (ShoppingItem item : currentItems) {
             Product product = item.getProduct();
-            product.updateStock(-item.getQuantity());  // 销售：库存-数量；退货：库存-（负数）=+数量
+            product.updateStock(-item.getQuantity());  // Sale: stock - qty; Return: stock - (negative) = +qty
         }
 
-        // 2. 生成销售收据
+        // 2. Generate sale receipt
         Receipt receipt = new Receipt(currentItems, "SALE");
-        // 3. 清空当前交易（准备下一笔）
+        // 3. Clear current transaction
         currentItems.clear();
         return receipt;
     }
 
-    // 处理退货（直接生成退货收据，更新库存）
+    // Process return (generate return receipt and update stock)
     public Receipt processReturn() {
-        double totalRefund = calculateTotalAmount();  // 退货总金额（为负数，绝对值为退款金额）
+        double totalRefund = calculateTotalAmount();  // Negative value, abs() is refund amount
         if (totalRefund >= 0) {
-            throw new IllegalArgumentException("退货商品数量不能为正！");
+            throw new IllegalArgumentException("Return item quantity must be negative!");
         }
 
-        // 1. 更新库存（退货：增加库存）
+        // 1. Update stock (return: increase)
         for (ShoppingItem item : currentItems) {
             Product product = item.getProduct();
-            product.updateStock(-item.getQuantity());  // 退货数量为负，-quantity=正数，库存增加
+            product.updateStock(-item.getQuantity());  // Quantity negative, -quantity positive => stock increases
         }
 
-        // 2. 生成退货收据
+        // 2. Generate return receipt
         Receipt receipt = new Receipt(currentItems, "RETURN");
-        // 3. 清空当前交易
+        // 3. Clear current transaction
         currentItems.clear();
         return receipt;
     }
 
-    // 计算当前交易总金额
+    // Calculate total amount of current transaction
     public double calculateTotalAmount() {
         return currentItems.stream()
                 .mapToDouble(ShoppingItem::calculateItemTotal)
                 .sum();
     }
-    // 获取当前交易的购物项（供GUI显示商品明细）
+    // Get shopping items (for GUI to display item details)
     public List<ShoppingItem> getCurrentItems() {
         return currentItems;
     }
 
-    // 取消当前交易
+    // Cancel current transaction
     public void cancelTransaction() {
         currentItems.clear();
-        System.out.println("交易已取消！");
+        System.out.println("Transaction cancelled!");
     }
 }

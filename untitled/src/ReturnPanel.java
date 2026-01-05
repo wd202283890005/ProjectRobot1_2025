@@ -5,13 +5,13 @@ import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
 /**
- * 退货功能面板：输入退货商品ID、数量，确认退货，显示应退金额
+ * Return panel: input product ID & quantity, confirm return, show refund amount
  */
 public class ReturnPanel extends JPanel {
     private final Checkout checkout;
     private final Consumer<Receipt> receiptCallback;
 
-    // 组件
+    // Components
     private JTextField productIdField;
     private JTextField quantityField;
     private JTextArea returnTextArea;
@@ -27,51 +27,51 @@ public class ReturnPanel extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // 1. 顶部：输入区域
+        // 1. Top: input area
         JPanel inputPanel = new JPanel(new GridLayout(1, 4, 10, 10));
-        inputPanel.add(new JLabel("退货商品ID：", SwingConstants.CENTER));
+        inputPanel.add(new JLabel("Product ID (Return):", SwingConstants.CENTER));
         productIdField = new JTextField();
-        SalePanel.setHintText(productIdField, "输入商品ID（如P001）");
+        SalePanel.setHintText(productIdField, "e.g. P001");
         inputPanel.add(productIdField);
 
-        inputPanel.add(new JLabel("退货数量：", SwingConstants.CENTER));
+        inputPanel.add(new JLabel("Quantity:", SwingConstants.CENTER));
         quantityField = new JTextField();
-        SalePanel.setHintText(quantityField, "输入正整数");
+        SalePanel.setHintText(quantityField, "Enter positive integer");
         inputPanel.add(quantityField);
 
-        JButton addBtn = new JButton("添加退货商品");
+        JButton addBtn = new JButton("Add");
         addBtn.addActionListener(new AddReturnItemListener());
         inputPanel.add(addBtn);
         add(inputPanel, BorderLayout.NORTH);
 
-        // 2. 中间：退货列表显示区
+        // 2. Middle: return list area
         returnTextArea = new JTextArea();
         returnTextArea.setEditable(false);
         returnTextArea.setFont(new Font("Monaco", Font.PLAIN, 12));
         JScrollPane returnScroll = new JScrollPane(returnTextArea);
-        returnScroll.setBorder(BorderFactory.createTitledBorder("当前退货商品"));
+        returnScroll.setBorder(BorderFactory.createTitledBorder("Return Items"));
         add(returnScroll, BorderLayout.CENTER);
 
-        // 3. 底部：退款金额与确认区域
+        // 3. Bottom: refund & confirm area
         JPanel refundPanel = new JPanel(new GridLayout(1, 3, 10, 10));
-        refundPanel.add(new JLabel("应退金额：", SwingConstants.CENTER));
-        refundLabel = new JLabel("0.00 元", SwingConstants.CENTER);
+        refundPanel.add(new JLabel("Refund:", SwingConstants.CENTER));
+        refundLabel = new JLabel("0.00 CNY", SwingConstants.CENTER);
         refundLabel.setFont(new Font("Arial", Font.BOLD, 14));
         refundLabel.setForeground(new Color(0, 128, 0));
         refundPanel.add(refundLabel);
 
-        JButton confirmBtn = new JButton("确认退货");
+        JButton confirmBtn = new JButton("Confirm");
         confirmBtn.addActionListener(new ConfirmReturnListener());
         refundPanel.add(confirmBtn);
 
-        JButton resetBtn = new JButton("重置退货");
+        JButton resetBtn = new JButton("Reset");
         resetBtn.addActionListener(e -> resetReturn());
         refundPanel.add(resetBtn);
         add(refundPanel, BorderLayout.SOUTH);
     }
 
     /**
-     * 添加退货商品监听器
+     * Listener for adding return items
      */
     private class AddReturnItemListener implements ActionListener {
         @Override
@@ -80,34 +80,34 @@ public class ReturnPanel extends JPanel {
                 String productId = productIdField.getText().trim();
                 int quantity = Integer.parseInt(quantityField.getText().trim());
 
-                // 输入校验
+                // Validation
                 if (productId.isEmpty()) {
-                    JOptionPane.showMessageDialog(ReturnPanel.this, "商品ID不能为空！", "输入错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(ReturnPanel.this, "Product ID cannot be empty!", "Input Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 if (quantity <= 0) {
-                    JOptionPane.showMessageDialog(ReturnPanel.this, "退货数量必须为正整数！", "输入错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(ReturnPanel.this, "Quantity must be a positive integer!", "Input Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // 调用业务逻辑添加退货商品（数量传负数）
+                // Business logic: add return item (negative quantity)
                 checkout.addItem(productId, -quantity);
                 updateReturnDisplay();
-                JOptionPane.showMessageDialog(ReturnPanel.this, "退货商品添加成功！", "成功", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(ReturnPanel.this, "Return item added!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-                // 清空输入框
+                // Clear fields
                 productIdField.setText("");
                 quantityField.setText("");
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(ReturnPanel.this, "数量格式错误！请输入整数", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ReturnPanel.this, "Quantity format error! Please enter an integer", "Error", JOptionPane.ERROR_MESSAGE);
             } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(ReturnPanel.this, ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ReturnPanel.this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     /**
-     * 确认退货监听器
+     * Listener to confirm return
      */
     private class ConfirmReturnListener implements ActionListener {
         @Override
@@ -115,47 +115,47 @@ public class ReturnPanel extends JPanel {
             try {
                 double totalRefund = Math.abs(checkout.calculateTotalAmount());
                 if (totalRefund <= 0) {
-                    JOptionPane.showMessageDialog(ReturnPanel.this, "未添加任何退货商品！", "错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(ReturnPanel.this, "No return items added!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // 确认弹窗
+                // Confirm dialog
                 int confirm = JOptionPane.showConfirmDialog(ReturnPanel.this,
-                        "确认退货？应退金额：" + totalRefund + " 元", "确认", JOptionPane.YES_NO_OPTION);
+                        "Confirm return? Refund: " + totalRefund + " CNY", "Confirm", JOptionPane.YES_NO_OPTION);
                 if (confirm != JOptionPane.YES_OPTION) return;
 
-                // 调用业务逻辑处理退货
+                // Process return
                 Receipt receipt = checkout.processReturn();
-                JOptionPane.showMessageDialog(ReturnPanel.this, "退货成功！即将显示收据", "成功", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(ReturnPanel.this, "Return successful! Showing receipt.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 receiptCallback.accept(receipt);
                 resetReturn();
             } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(ReturnPanel.this, ex.getMessage(), "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ReturnPanel.this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     /**
-     * 更新退货列表和应退金额
+     * Update list and refund amount
      */
     private void updateReturnDisplay() {
         double totalRefund = Math.abs(checkout.calculateTotalAmount());
-        refundLabel.setText(totalRefund + " 元");
+        refundLabel.setText(totalRefund + " CNY");
 
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-10s %-10s %-6s %-6s %-6s%n", "商品ID", "商品名称", "单价", "退货数量", "应退小计"));
+        sb.append(String.format("%-10s %-10s %-6s %-8s %-8s%n", "ID", "Name", "Price", "Qty", "Subtotal"));
         sb.append("----------------------------------------\n");
-        sb.append(String.format("%-10s %-10s %-6s %-6s %-6.2f%n", "---", "累计", "---", "---", totalRefund));
+        sb.append(String.format("%-10s %-10s %-6s %-8s %-8.2f%n", "---", "Total", "---", "---", totalRefund));
         returnTextArea.setText(sb.toString());
     }
 
     /**
-     * 重置退货交易
+     * Reset return transaction
      */
     private void resetReturn() {
         checkout.cancelTransaction();
         returnTextArea.setText("");
-        refundLabel.setText("0.00 元");
+        refundLabel.setText("0.00 CNY");
         productIdField.setText("");
         quantityField.setText("");
     }

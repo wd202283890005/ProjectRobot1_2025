@@ -1,14 +1,14 @@
 /**
- * 商品类：封装商品核心信息
+ * Product class: encapsulates core product information
  */
 public class Product {
-    // 商品属性（私有封装）
-    private String productId;    // 商品唯一ID
-    private String productName;  // 商品名称
-    private double price;        // 商品单价
-    private int stockQuantity;   // 库存数量
+    // Product attributes (encapsulated)
+    private String productId;    // Unique product ID
+    private String productName;  // Product name
+    private double price;        // Unit price
+    private int stockQuantity;   // Stock quantity
 
-    // 构造方法（初始化商品）
+    // Constructor (initialize product)
     public Product(String productId, String productName, double price, int stockQuantity) {
         this.productId = productId;
         this.productName = productName;
@@ -16,7 +16,7 @@ public class Product {
         this.stockQuantity = stockQuantity;
     }
 
-    // Getter/Setter 方法（属性访问控制）
+    // Getter/Setter methods
     public String getProductId() {
         return productId;
     }
@@ -33,10 +33,10 @@ public class Product {
         return stockQuantity;
     }
 
-    // 库存更新方法（增加/减少库存）
+    // Update stock (increase/decrease)
     public void updateStock(int quantity) {
         if (this.stockQuantity + quantity < 0) {
-            throw new IllegalArgumentException("库存不足，无法操作");
+            throw new IllegalArgumentException("Not enough stock to perform operation");
         }
         this.stockQuantity += quantity;
     }

@@ -2,10 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * 库存查询面板：显示所有商品的ID、名称、单价、库存
+ * Inventory panel: displays all product IDs, names, prices, and stock quantities
  */
 public class InventoryPanel extends JPanel {
-    private final Inventory inventory = Inventory.getInstance(); // 单例库存
+    private final Inventory inventory = Inventory.getInstance(); // Singleton inventory
 
     public InventoryPanel() {
         initUI();
@@ -15,26 +15,26 @@ public class InventoryPanel extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // 标题
-        JLabel titleLabel = new JLabel("超市商品库存列表", SwingConstants.CENTER);
+        // Title
+        JLabel titleLabel = new JLabel("Product Inventory List", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         add(titleLabel, BorderLayout.NORTH);
 
-        // 库存表格
+        // Inventory table (simple text area)
         JTextArea inventoryTextArea = new JTextArea();
         inventoryTextArea.setEditable(false);
         inventoryTextArea.setFont(new Font("Monaco", Font.PLAIN, 12));
         JScrollPane scroll = new JScrollPane(inventoryTextArea);
         add(scroll, BorderLayout.CENTER);
 
-        // 构建库存文本
+        // Build inventory text
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-10s %-15s %-8s %-8s%n", "商品ID", "商品名称", "单价（元）", "库存数量"));
+        sb.append(String.format("%-10s %-15s %-12s %-12s%n", "ID", "Name", "Price (CNY)", "Stock"));
         sb.append("------------------------------------------------\n");
 
-        // 遍历所有商品（需给Inventory添加getAllProducts()方法，扩展如下）
+        // Iterate all products
         for (Product product : inventory.getAllProducts()) {
-            sb.append(String.format("%-10s %-15s %-8.2f %-8d%n",
+            sb.append(String.format("%-10s %-15s %-12.2f %-12d%n",
                     product.getProductId(),
                     product.getProductName(),
                     product.getPrice(),
@@ -42,13 +42,4 @@ public class InventoryPanel extends JPanel {
         }
         inventoryTextArea.setText(sb.toString());
     }
-
-    /**
-     * 扩展Inventory类：添加获取所有商品的方法（在原有Inventory类中新增）
-     * 注：此处为了代码完整性，需同步修改Inventory类
-     */
-    // 在Inventory类中新增：
-    // public Collection<Product> getAllProducts() {
-    //     return productMap.values();
-    // }
 }

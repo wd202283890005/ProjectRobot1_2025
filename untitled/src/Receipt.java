@@ -3,16 +3,16 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 收据类：生成销售/退货小票
+ * Receipt class: generates sale/return receipts
  */
 public class Receipt {
-    private String receiptId;          // 收据唯一ID
-    private List<ShoppingItem> items;  // 购物项列表
-    private double totalAmount;        // 总金额（销售=正数，退货=负数）
-    private Date transactionTime;      // 交易时间
-    private String transactionType;    // 交易类型（SALE=销售，RETURN=退货）
+    private String receiptId;          // Unique receipt ID
+    private List<ShoppingItem> items;  // Item list
+    private double totalAmount;        // Total amount (sale = positive, return = negative)
+    private Date transactionTime;      // Transaction time
+    private String transactionType;    // Transaction type (SALE or RETURN)
 
-    // 构造方法（生成收据）
+    // Constructor (build receipt)
     public Receipt(List<ShoppingItem> items, String transactionType) {
         this.receiptId = generateReceiptId();
         this.items = items;
@@ -21,7 +21,7 @@ public class Receipt {
         this.totalAmount = calculateTotalAmount();
     }
 
-    // 生成唯一收据ID（时间戳+随机数）
+    // Generate unique receipt ID (timestamp + random number)
     private String generateReceiptId() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         String timeStr = sdf.format(new Date());
@@ -29,58 +29,37 @@ public class Receipt {
         return timeStr + String.format("%03d", randomNum);
     }
 
-    // 计算总金额
+    // Calculate total amount
     private double calculateTotalAmount() {
-        return items.stream()
-                .mapToDouble(ShoppingItem::calculateItemTotal)
-                .sum();
-    }
-    // 获取购物项列表（供收据预览面板使用）
-    public List<ShoppingItem> getItems() {
-        return items;
+        return items.stream().mapToDouble(ShoppingItem::calculateItemTotal).sum();
     }
 
-    // 获取交易类型（供收据预览面板使用）
-    public String getTransactionType() {
-        return transactionType;
-    }
+    // Getters for GUI usage
+    public List<ShoppingItem> getItems() { return items; }
+    public String getTransactionType() { return transactionType; }
+    public Date getTransactionTime() { return transactionTime; }
+    public String getReceiptId() { return receiptId; }
+    public double getTotalAmount() { return totalAmount; }
 
-    // 获取交易时间（供收据预览面板使用）
-    public Date getTransactionTime() {
-        return transactionTime;
-    }
-
-    // 打印收据（控制台输出，实际项目可导出为PDF）
+    // Print receipt to console (could export to PDF in real project)
     public void printReceipt() {
         System.out.println("======================================");
-        System.out.println("          超市POS系统 - 收据");
+        System.out.println("        Supermarket POS - Receipt");
         System.out.println("======================================");
-        System.out.println("收据ID: " + receiptId);
-        System.out.println("交易类型: " + (transactionType.equals("SALE") ? "销售" : "退货"));
-        System.out.println("交易时间: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(transactionTime));
+        System.out.println("Receipt ID: " + receiptId);
+        System.out.println("Type: " + (transactionType.equals("SALE") ? "Sale" : "Return"));
+        System.out.println("Time: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(transactionTime));
         System.out.println("--------------------------------------");
-        System.out.printf("%-10s %-10s %-6s %-6s%n", "商品ID", "商品名称", "单价", "数量");
+        System.out.printf("%-10s %-10s %-6s %-6s%n", "ID", "Name", "Price", "Qty");
         System.out.println("--------------------------------------");
         for (ShoppingItem item : items) {
             Product p = item.getProduct();
             System.out.printf("%-10s %-10s %-6.2f %-6d%n",
-                    p.getProductId(),
-                    p.getProductName(),
-                    p.getPrice(),
-                    item.getQuantity());
+                    p.getProductId(), p.getProductName(), p.getPrice(), item.getQuantity());
         }
         System.out.println("--------------------------------------");
-        System.out.println("总金额: " + String.format("%.2f", totalAmount) + " 元");
+        System.out.println("Total: " + String.format("%.2f", totalAmount) + " CNY");
         System.out.println("======================================");
-        System.out.println("感谢您的光临！");
-    }
-
-    // Getter 方法（供报告/日志使用）
-    public String getReceiptId() {
-        return receiptId;
-    }
-
-    public double getTotalAmount() {
-        return totalAmount;
+        System.out.println("Thank you for shopping!");
     }
 }
